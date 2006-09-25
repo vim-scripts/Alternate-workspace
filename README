@@ -1,0 +1,43 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=1666
+
+ This script provide a way to quickly switch between files from different workspaces (Child and Parent). And to see difference between them.
+
+Set variable g:aw_child_path and g:aw_parent_path to work with this script.
+
+Example of vimrc:
+
+   let g:aw_child_path = '/home/ni/branch'
+   let g:aw_parent_path = '/project/' 
+   let g:aw_stop_word = 'src'
+
+   nnoremap \wd :AWDiffMirror<CR>
+   nnoremap \we :AWEditMirror<CR>
+
+EDIT MIRROR
+
+Suppose you have two files in different workspaces.
+You edit now file from child workspace.
+
+you are at line 100
+in that line is text 'int main()'
+
+in alternate file there is line 'int main()' too but in line 200
+
+after command :AWEditMirrorFile you will be at line 200 in alternate file
+It is very useful.
+
+if there is now such line in alternate file you'll be at line 100.
+
+SET WORKSPACES 
+
+Use AWSetChild and AWSetParent commands to set workspaces directories (thanks to Sergey Popov).
+
+Use AWAutoSetChild and AWAutoSetParent commands - this commands will create child and parent path form current file name
+example: 
+    let g:aw_stop_word = 'src'
+    current file name = '/home/me/project/src/..../.../1.cpp'
+    after execution of AWAutoSetChild aw_child_path will be '/home/me/project/'
+
+:AWEditMirrorFile - edit alternate file
+:AWDiffMirrorFile - diff current and alternate file
+
