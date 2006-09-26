@@ -8,15 +8,17 @@
 " Set variable g:aw_child_path and g:aw_parent_path to work with this script
 " Example
 " 	let g:aw_child_path = /home/ni/branch
-" 	leg g:aw_parent_path = /project/
+" 	let g:aw_parent_path = /project/
 
 if exists('loaded_workspace_alternate_file')
 	finish
 endif
 
-if ! exists('g:aw_parent_path') || ! exists('g:aw_child_path')
-	echohl WarningMsg | echo "Alternate workspace's variables not set. Plugin exit. " | echohl None
-	finish
+if ! exists('g:aw_parent_path')
+    let g:aw_parent_path = getcwd()
+endif
+if ! exists('g:aw_child_path')
+    let g:aw_child_path = getcwd()
 endif
 
 let loaded_workspace_alternate_file = 1
@@ -31,6 +33,8 @@ endif
 
 nnoremap <unique> <script> <Plug>AWEditMirrorFile :call <SID>EditMirrorFile(expand("%:p"))<CR>
 nnoremap <unique> <script> <Plug>AWDiffMirrorFile :call <SID>DiffMirrorFile(expand("%:p"))<CR>
+command! -complete=dir AWSetChild call <SID>AW_SetChild()
+command! -complete=dir AWSetParent call <SID>AW_SetParent()
 
 function! <SID>WorkSpaceChangeFileName(child_work_space, parent_work_space, file_name)
 	let l:child_workspace = substitute(a:child_work_space, '\\', '/', 'g')
@@ -56,6 +60,10 @@ function! <SID>WorkSpaceChangeFileName(child_work_space, parent_work_space, file
 endfunction
 
 function! <SID>EditMirrorFile(file_name)
+	if g:aw_parent_path == g:aw_child_path
+	        echohl WarningMsg | echo "Child and parent directories are same" | echohl None
+		return
+	endif
 	let l:new_file = <SID>WorkSpaceChangeFileName(g:aw_child_path, g:aw_parent_path, a:file_name)
 	if filereadable(l:new_file)
 		exec "edit ".l:new_file
@@ -66,6 +74,10 @@ function! <SID>EditMirrorFile(file_name)
 endfunction
 
 function! <SID>DiffMirrorFile(file_name)
+	if g:aw_parent_path == g:aw_child_path
+	        echohl WarningMsg | echo "Child and parent directories are same" | echohl None
+		return
+	endif
 	let l:new_file = <SID>WorkSpaceChangeFileName(g:aw_child_path, g:aw_parent_path, a:file_name)
 	if filereadable(l:new_file)
 		exec "vert diffsplit ".l:new_file
@@ -73,4 +85,21 @@ function! <SID>DiffMirrorFile(file_name)
 	endif
 
 	echohl WarningMsg | echo "Alternate file not found : ".l:new_file | echohl None
+endfunction
+
+function! <SID>AWSetDir(cur_dir, text)
+	if a:cur_dir == ''
+	    let tmp = getcwd() . "/"
+	else
+	    let tmp = a:cur_dir
+	endif
+	let tmp = input("Alternate workspace set " . a:text. ":", tmp, "dir")
+	return tmp
+endfunction
+
+function! <SID>AW_SetChild()
+	let g:aw_child_path = <SID>AWSetDir(g:aw_child_path, "child")
+endfunction
+function! <SID>AW_SetParent()
+	let g:aw_parent_path = <SID>AWSetDir(g:aw_parent_path, "parent")
 endfunction
